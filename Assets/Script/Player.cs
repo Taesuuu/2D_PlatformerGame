@@ -9,10 +9,14 @@ public class Player : MonoBehaviour
     public UnityEvent toucthTrap;
     public UnityEvent stageClear;
     public UnityEvent getKeyObj;
+    public UnityEvent gethpobj;
+    public UnityEvent boxtouch;
 
     [Header("-----Public-----")]
     public float maxSpeed;
     public float jumpPower;
+    public float timer;
+    GameObject temp;
 
     private Rigidbody2D m_rigidbody2D;
     private Animator m_animator;
@@ -55,13 +59,56 @@ public class Player : MonoBehaviour
             collision.gameObject.SetActive(false);
             getKeyObj.Invoke();
         }
-        if (collision.CompareTag("Trap"))
+        if (collision.CompareTag("HP"))
         {
-            toucthTrap.Invoke();
+            collision.gameObject.SetActive(false);
+            gethpobj.Invoke();
         }
+        
         if (collision.CompareTag("EndObject"))
         {
             stageClear.Invoke();
         }
+
+        if (collision.CompareTag("RandomBox"))
+        {
+            temp = collision.gameObject;
+            Invoke("activefalse", 1.0f);
+            boxtouch.Invoke();
+        }
+    }
+
+    public void activefalse()
+    {
+        temp.SetActive(false);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Trap")
+        {
+            Debug.Log("트랩");
+            toucthTrap.Invoke();
+        }
+        
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        timer += Time.deltaTime;
+        if(timer > 1.0f)
+        {
+            if (collision.CompareTag("ladder"))
+            {
+                m_rigidbody2D.velocity = Vector2.zero;
+                m_rigidbody2D.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            }
+        }
+      
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        timer = 0;
     }
 }

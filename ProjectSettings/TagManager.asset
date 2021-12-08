@@ -9,6 +9,9 @@ TagManager:
   - EndObejct
   - Trap
   - EndObject
+  - HP
+  - ladder
+  - RandomBox
   layers:
   - Default
   - TransparentFX

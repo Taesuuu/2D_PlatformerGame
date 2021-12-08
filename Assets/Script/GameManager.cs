@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     [Header("-----GameObject-----")]
     public GameObject[] endObjects;
+    public GameObject[] boxObjects;
     public GameObject Player;
 
     [Header("-----Stages-----")]
@@ -14,7 +16,12 @@ public class GameManager : MonoBehaviour
     [Header("-----Int & Float-----")]
     public int stageKeyNum;
     public int keyCount;
+    public int playerHp;
 
+    [Header("-----UI obejct-----")]
+    public Text keyCountText;
+    public Text stageText;
+    public Image[] hps;
 
     private Vector2 startPos;
     private int stageIndex;
@@ -23,6 +30,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         stageIndex = 0;
+        playerHp = 3;
+        stageText.text = "Stage " + (stageIndex + 1);
         startPos = new Vector2(Player.transform.position.x, Player.transform.position.y);
         for(int i = 0; i < Stages.Length; i++)
         {
@@ -32,6 +41,7 @@ public class GameManager : MonoBehaviour
 
         Stages[stageIndex].SetActive(true);
         GetStageKeyNum();
+        keyCountText.text = keyCount + " / " + stageKeyNum;
     }
 
     // Update is called once per frame
@@ -44,6 +54,12 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("밟았다");
         Player.transform.position = startPos;
+        playerHp--;
+        hps[playerHp % 2].color = new Color(1, 1, 1, 0.5f);
+        if(playerHp == 0)
+        {
+            GameOver();
+        }
     }
 
     public void stageClear()
@@ -59,22 +75,49 @@ public class GameManager : MonoBehaviour
         }
         GetStageKeyNum();
         Stages[stageIndex].SetActive(true);
+        Player.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        keyCountText.text = keyCount + " / " + stageKeyNum;
+        stageText.text = "Stage " + (stageIndex + 1);
     }
 
     public void GetKeyOjbect()
     {
         keyCount++;
-        if(keyCount == stageKeyNum)
+        keyCountText.text = keyCount + " / " + stageKeyNum;
+        if (keyCount == stageKeyNum)
         {
             endObjects[stageIndex].SetActive(true);
         }
     }
 
+    public void GetHPobject()
+    {
+        hps[playerHp % 2].color = new Color(1, 1, 1, 1f);
+        if(playerHp == 3 )
+        {
+            return;
+        }
+        else
+        {
+            playerHp++;
+        }
+        
+    }
+
     public void GameOver()
     {
         //게임 종료
+        for(int y = 0; y < hps.Length; y++)
+        {
+            hps[y].color = new Color(1, 0, 0, 0);
+        }
+        for(int i = 0; i < Stages.Length; i++)
+        {
+            Stages[i].SetActive(false);
+        }
+
         Debug.Log("게임 종료");
-        Player.GetComponent<Rigidbody2D>().gravityScale = 0;
+
 
         // 클로징 화면 출력
     }
@@ -93,5 +136,10 @@ public class GameManager : MonoBehaviour
                 stageKeyNum = 5;
                 break;
         }
+    }
+
+    public void RandomBoxtouch()
+    {
+        boxObjects[stageIndex].SetActive(true);
     }
 }

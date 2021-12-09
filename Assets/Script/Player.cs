@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
     public float maxSpeed;
     public float jumpPower;
     public float timer;
+    public bool isItem;
     GameObject temp;
 
     private Rigidbody2D m_rigidbody2D;
@@ -73,7 +74,8 @@ public class Player : MonoBehaviour
         if (collision.CompareTag("RandomBox"))
         {
             temp = collision.gameObject;
-            Invoke("activefalse", 1.0f);
+            temp.GetComponent<BoxCollider2D>().enabled = false;
+            //Invoke("activefalse", 1.0f);
             boxtouch.Invoke();
         }
     }
@@ -87,8 +89,31 @@ public class Player : MonoBehaviour
     {
         if (collision.gameObject.tag == "Trap")
         {
-            Debug.Log("트랩");
-            toucthTrap.Invoke();
+            if (isItem)
+            {
+                //m_animator.SetBool("isItem", false);
+                m_animator.SetTrigger("retrunPlayer");
+                //transform.localScale = new Vector3(0.85f, 1f, 1f);
+                isItem = false;
+                // 무적타임 추가 해야할 듯
+            }
+            else
+            {
+                Debug.Log("트랩");
+                toucthTrap.Invoke();
+            }
+            
+        }
+        if(collision.gameObject.tag == "Item")
+        {
+            collision.gameObject.SetActive(false);
+            if (!isItem)
+            {
+                //m_animator.SetBool("isItem", true);
+                m_animator.SetTrigger("getItem");
+                transform.localScale = new Vector3(1.2f, 1.5f, 1.5f);
+                isItem = true;
+            }
         }
         
     }
@@ -96,7 +121,7 @@ public class Player : MonoBehaviour
     private void OnTriggerStay2D(Collider2D collision)
     {
         timer += Time.deltaTime;
-        if(timer > 1.0f)
+        if(timer > 0.6f)
         {
             if (collision.CompareTag("ladder"))
             {

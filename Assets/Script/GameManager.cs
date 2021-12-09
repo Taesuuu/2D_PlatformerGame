@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("밟았다");
         Player.transform.position = startPos;
         playerHp--;
-        hps[playerHp % 2].color = new Color(1, 1, 1, 0.5f);
+        hps[playerHp % 2].color = new Color(1, 1, 1, 0.3f);
         if(playerHp == 0)
         {
             GameOver();

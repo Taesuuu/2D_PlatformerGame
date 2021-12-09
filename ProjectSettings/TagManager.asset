@@ -12,6 +12,7 @@ TagManager:
   - HP
   - ladder
   - RandomBox
+  - Item
   layers:
   - Default
   - TransparentFX

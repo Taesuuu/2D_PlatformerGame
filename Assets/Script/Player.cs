@@ -19,22 +19,51 @@ public class Player : MonoBehaviour
     public bool isItem;
     GameObject temp;
 
+    int jumpCount;
+
+    private SpriteRenderer m_spriteRenderer;
     private Rigidbody2D m_rigidbody2D;
     private Animator m_animator;
 
     // Start is called before the first frame update
     void Start()
     {
+        jumpCount = 2;
         m_rigidbody2D = GetComponent<Rigidbody2D>();
         m_animator = GetComponent<Animator>();
+        m_spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && !m_animator.GetBool("isDoubleJump"))
         {
             m_rigidbody2D.AddForce(Vector2.up * jumpPower , ForceMode2D.Impulse);
+            //Debug.Log(m_rigidbody2D.velocity.y);
+            jumpCount--;
+            m_animator.SetBool("isJump", true);
+            if(m_animator.GetBool("isJump") && jumpCount == 0)
+            {
+                m_animator.SetBool("isDoubleJump", true);
+                m_rigidbody2D.AddForce(Vector2.right * jumpPower * m_rigidbody2D.velocity.x, ForceMode2D.Impulse);
+            }
         }
+
+        //방향전환
+        if (Input.GetButtonDown("Horizontal"))
+        {
+            m_spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        }
+
+        if(Mathf.Abs(m_rigidbody2D.velocity.x) < 0.3f)
+        {
+            m_animator.SetBool("isRun", false);
+        }
+        else
+        {
+            m_animator.SetBool("isRun", true);
+        }
+
     }
     // Update is called once per frame
     void FixedUpdate()
@@ -51,6 +80,26 @@ public class Player : MonoBehaviour
         {
             m_rigidbody2D.velocity = new Vector2(maxSpeed * (-1), m_rigidbody2D.velocity.y);
         }
+
+        if(m_rigidbody2D.velocity.y < 0)
+        {
+            Debug.DrawRay(m_rigidbody2D.position, Vector3.down, new Color(1, 0, 0));
+
+            RaycastHit2D hit = Physics2D.Raycast(m_rigidbody2D.position, Vector3.down, 1f, LayerMask.GetMask("Platform"));
+
+            if (hit.collider != null)
+            {
+                if (hit.distance < 1.2f)
+                {
+                    m_animator.SetBool("isJump", false);
+                    m_animator.SetBool("isDoubleJump", false);
+                    jumpCount = 2;
+                }
+            }
+        }
+      
+
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

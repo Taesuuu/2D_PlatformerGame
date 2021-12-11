@@ -104,6 +104,15 @@ public class GameManager : MonoBehaviour
         
     }
 
+    public void GetItemObject()
+    {
+        playerHp = 3;
+        for(int i = 0; i < hps.Length; i++)
+        {
+            hps[i].color = new Color(1, 1, 1, 1f);
+        }
+    }
+
     public void GameOver()
     {
         //게임 종료

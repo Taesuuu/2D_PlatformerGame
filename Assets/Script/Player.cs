@@ -11,12 +11,14 @@ public class Player : MonoBehaviour
     public UnityEvent getKeyObj;
     public UnityEvent gethpobj;
     public UnityEvent boxtouch;
+    public UnityEvent getItem;
 
     [Header("-----Public-----")]
     public float maxSpeed;
     public float jumpPower;
     public float timer;
     public bool isItem;
+    public bool isTrap;
     GameObject temp;
 
     int jumpCount;
@@ -36,6 +38,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        
+
         if (Input.GetButtonDown("Jump") && !m_animator.GetBool("isDoubleJump"))
         {
             m_rigidbody2D.AddForce(Vector2.up * jumpPower , ForceMode2D.Impulse);
@@ -83,22 +87,51 @@ public class Player : MonoBehaviour
 
         if(m_rigidbody2D.velocity.y < 0)
         {
-            Debug.DrawRay(m_rigidbody2D.position, Vector3.down, new Color(1, 0, 0));
-
-            RaycastHit2D hit = Physics2D.Raycast(m_rigidbody2D.position, Vector3.down, 1f, LayerMask.GetMask("Platform"));
-
-            if (hit.collider != null)
+            if (isItem)
             {
-                if (hit.distance < 1.2f)
+                Debug.Log("아이템 온");
+                Debug.DrawRay(m_rigidbody2D.position, Vector3.down * 1.5f, new Color(1, 0, 0));
+
+                RaycastHit2D hit = Physics2D.Raycast(m_rigidbody2D.position, Vector3.down * 1.5f, 2f, LayerMask.GetMask("Platform"));
+
+                if (hit.collider != null)
                 {
-                    m_animator.SetBool("isJump", false);
-                    m_animator.SetBool("isDoubleJump", false);
-                    jumpCount = 2;
+                    if (hit.distance < 1.5f)
+                    {
+                        m_animator.SetBool("isJump", false);
+                        m_animator.SetBool("isDoubleJump", false);
+                        jumpCount = 2;
+                    }
                 }
             }
-        }
-      
+            else
+            {
+                Debug.Log("아이템 오프");
+                Debug.DrawRay(m_rigidbody2D.position, Vector3.down, new Color(1, 0, 0));
 
+                RaycastHit2D hit = Physics2D.Raycast(m_rigidbody2D.position, Vector3.down, 1f, LayerMask.GetMask("Platform"));
+
+                if (hit.collider != null)
+                {
+                    if (hit.distance < 1.2f)
+                    {
+                        m_animator.SetBool("isJump", false);
+                        m_animator.SetBool("isDoubleJump", false);
+                        jumpCount = 2;
+                    }
+                }
+            }
+           
+        }
+
+        //if (isItem)
+        //{
+        //    transform.localScale = new Vector3(1.2f, 1.5f, 1.5f);
+        //}
+        //else
+        //{
+        //    transform.localScale = new Vector3(0.8f, 1f, 1f);
+        //}
 
     }
 
@@ -133,18 +166,26 @@ public class Player : MonoBehaviour
     {
         temp.SetActive(false);
     }
+    public void isTrapfalse()
+    {
+        isTrap = false;
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Trap")
         {
+            if (isTrap)
+            {
+                Invoke("isTrapfalse", 1f);
+                return;
+            }
             if (isItem)
             {
-                //m_animator.SetBool("isItem", false);
-                m_animator.SetTrigger("retrunPlayer");
-                //transform.localScale = new Vector3(0.85f, 1f, 1f);
+                isTrap = true;
+                //m_animator.SetBool("getItem", false);
+                transform.localScale = new Vector3(transform.localScale.x - 0.4f, transform.localScale.y - 0.5f, transform.localScale.z - 0.5f);
                 isItem = false;
-                // 무적타임 추가 해야할 듯
             }
             else
             {
@@ -153,16 +194,17 @@ public class Player : MonoBehaviour
             }
             
         }
-        if(collision.gameObject.tag == "Item")
+        if(collision.gameObject.tag == "Item_HP")
         {
             collision.gameObject.SetActive(false);
-            if (!isItem)
-            {
-                //m_animator.SetBool("isItem", true);
-                m_animator.SetTrigger("getItem");
-                transform.localScale = new Vector3(1.2f, 1.5f, 1.5f);
-                isItem = true;
-            }
+            getItem.Invoke();
+        }
+
+        if(collision.gameObject.tag == "Item_Scale")
+        {
+            collision.gameObject.SetActive(false);
+            transform.localScale = new Vector3(transform.localScale.x + 0.4f, transform.localScale.y + 0.5f, transform.localScale.z + 0.5f);
+            isItem = true;
         }
         
     }
